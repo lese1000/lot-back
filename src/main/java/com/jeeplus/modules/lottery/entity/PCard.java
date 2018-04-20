@@ -1,0 +1,79 @@
+/**
+ * apple
+ */
+package com.jeeplus.modules.lottery.entity;
+
+import javax.validation.constraints.NotNull;
+
+import com.jeeplus.common.persistence.DataEntity;
+import com.jeeplus.common.utils.excel.annotation.ExcelField;
+
+/**
+ * CARTEntity
+ * @author asd
+ * @version 2018-01-29
+ */
+public class PCard extends DataEntity<PCard> {
+	
+	private static final long serialVersionUID = 1L;
+	private Long playerId;		// player_id
+	private String playerName;		// player_id
+	private String cardNum;		// card_num
+	private String bank;		// bank
+	private String fullName;		// full_name
+	
+	public PCard() {
+		super();
+	}
+
+	public PCard(String id){
+		super(id);
+	}
+	
+	
+
+	@ExcelField(title="玩家名称", align=2, sort=1)
+	public String getPlayerName() {
+		return playerName;
+	}
+
+	public void setPlayerName(String playerName) {
+		this.playerName = playerName;
+	}
+
+	public Long getPlayerId() {
+		return playerId;
+	}
+
+	public void setPlayerId(Long playerId) {
+		this.playerId = playerId;
+	}
+	
+	@ExcelField(title="card_num", align=2, sort=2)
+	public String getCardNum() {
+		return cardNum;
+	}
+
+	public void setCardNum(String cardNum) {
+		this.cardNum = cardNum;
+	}
+	
+	@ExcelField(title="bank", align=2, sort=3)
+	public String getBank() {
+		return bank;
+	}
+
+	public void setBank(String bank) {
+		this.bank = bank;
+	}
+	
+	@ExcelField(title="full_name", align=2, sort=4)
+	public String getFullName() {
+		return fullName;
+	}
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+	
+}

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.PCardDao">
+    
+	<sql id="pCardColumns">
+		a.id AS "id",
+		a.player_id AS "playerId",
+		a.card_num AS "cardNum",
+		a.bank AS "bank",
+		a.full_name AS "fullName",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		b.player_name AS "playerName"
+	</sql>
+	
+	<sql id="pCardJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="PCard" >
+		SELECT 
+			<include refid="pCardColumns"/>
+		FROM p_card a
+		Left join p_player b on a.player_id=b.id
+		<include refid="pCardJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PCard" >
+		SELECT 
+			<include refid="pCardColumns"/>
+		FROM p_card a
+		Left join p_player b on a.player_id=b.id
+		<include refid="pCardJoins"/>
+		<where>
+			
+			<if test="playerName != null and playerName != ''">
+				AND b.player_name = #{playerName}
+			</if>
+			<if test="fullName != null and fullName != ''">
+				AND a.full_name = #{fullName}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY  a.id desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PCard" >
+		SELECT 
+			<include refid="pCardColumns"/>
+		FROM p_card a
+		Left join p_player b on a.player_id=b.id
+		<include refid="pCardJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO p_card(
+			player_id,
+			card_num,
+			bank,
+			full_name,
+			create_date,
+			update_date
+		) VALUES (
+			#{playerId},
+			#{cardNum},
+			#{bank},
+			#{fullName},
+			#{createDate},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE p_card SET 	
+			id = #{id},
+			player_id = #{playerId},
+			card_num = #{cardNum},
+			bank = #{bank},
+			full_name = #{fullName},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM p_card
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE p_card SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PCard" statementType="STATEMENT">
+		select * FROM p_card  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

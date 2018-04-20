@@ -1,0 +1,102 @@
+/**
+ * apple
+ */
+package com.jeeplus.modules.lottery.entity;
+
+import javax.validation.constraints.NotNull;
+import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import com.jeeplus.common.persistence.DataEntity;
+import com.jeeplus.common.utils.excel.annotation.ExcelField;
+
+/**
+ * 订单Entity
+ * @author asd
+ * @version 2018-01-29
+ */
+public class POrder extends DataEntity<POrder> {
+	
+	private static final long serialVersionUID = 1L;
+	private Long orderId;		// order_id
+	private String orderNum;		// order_num
+	private Long lotteryNumId;		// lottery_num_id
+	private Long playerId;		// player_id
+	private Integer isJoinBuy;		// 是否合买
+	private Integer orderStatus;		// 订单状态:0,未开奖，1，已派奖
+	private Date createTime;		// create_time
+	
+	public POrder() {
+		super();
+	}
+
+	public POrder(String id){
+		super(id);
+	}
+
+	@NotNull(message="order_id不能为空")
+	@ExcelField(title="order_id", align=2, sort=0)
+	public Long getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
+	
+	@ExcelField(title="order_num", align=2, sort=1)
+	public String getOrderNum() {
+		return orderNum;
+	}
+
+	public void setOrderNum(String orderNum) {
+		this.orderNum = orderNum;
+	}
+	
+	@ExcelField(title="lottery_num_id", align=2, sort=2)
+	public Long getLotteryNumId() {
+		return lotteryNumId;
+	}
+
+	public void setLotteryNumId(Long lotteryNumId) {
+		this.lotteryNumId = lotteryNumId;
+	}
+	
+	@ExcelField(title="player_id", align=2, sort=3)
+	public Long getPlayerId() {
+		return playerId;
+	}
+
+	public void setPlayerId(Long playerId) {
+		this.playerId = playerId;
+	}
+	
+	@ExcelField(title="是否合买", align=2, sort=4)
+	public Integer getIsJoinBuy() {
+		return isJoinBuy;
+	}
+
+	public void setIsJoinBuy(Integer isJoinBuy) {
+		this.isJoinBuy = isJoinBuy;
+	}
+	
+	@ExcelField(title="订单状态:0,未开奖，1，已派奖", align=2, sort=5)
+	public Integer getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(Integer orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+	
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@ExcelField(title="create_time", align=2, sort=6)
+	public Date getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Date createTime) {
+		this.createTime = createTime;
+	}
+	
+}

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.LLotteryNumDao">
+    
+	<sql id="lLotteryNumColumns">
+		a.id AS "id",
+		a.lottery_type_id AS "lotteryTypeId",
+		b.lottery_type_name AS "lotteryTypeName",
+		a.lottery_num AS "lotteryNum",
+		a.win_num AS "winNum",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.open_time AS "openTime",
+		a.create_user AS "createUser",
+		a.update_user AS "updateUser"
+	</sql>
+	
+	<sql id="lLotteryNumJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="LLotteryNum" >
+		SELECT 
+			<include refid="lLotteryNumColumns"/>
+		FROM l_lottery_num a
+		left join l_lottery_type b on a.lottery_type_id =b.id
+		<include refid="lLotteryNumJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LLotteryNum" >
+		SELECT 
+			<include refid="lLotteryNumColumns"/>
+		FROM l_lottery_num a
+		left join l_lottery_type b on a.lottery_type_id =b.id
+		<include refid="lLotteryNumJoins"/>
+		<where>
+			
+			<if test="lotteryTypeId != null and lotteryTypeId != ''">
+				AND a.lottery_type_id = #{lotteryTypeId}
+			</if>
+			<if test="lotteryNum != null and lotteryNum != ''">
+				AND a.lottery_num = #{lotteryNum}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.open_time BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="LLotteryNum" >
+		SELECT 
+			<include refid="lLotteryNumColumns"/>
+		FROM l_lottery_num a
+		left join l_lottery_type b on a.lottery_type_id =b.id
+		<include refid="lLotteryNumJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO l_lottery_num(
+			lottery_type_id,
+			lottery_num,
+			win_num,
+			create_date,
+			open_time,
+			create_user
+		) VALUES (
+			#{lotteryTypeId},
+			#{lotteryNum},
+			#{winNum},
+			#{createDate},
+			#{openTime},
+			#{createUser}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE l_lottery_num SET 	
+			id = #{id},
+			lottery_type_id = #{lotteryTypeId},
+			lottery_num = #{lotteryNum},
+			win_num = #{winNum},
+			update_date = #{updateDate},
+			open_time = #{openTime},
+			update_user = #{updateUser}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM l_lottery_num
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE l_lottery_num SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="LLotteryNum" statementType="STATEMENT">
+		select * FROM l_lottery_num  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

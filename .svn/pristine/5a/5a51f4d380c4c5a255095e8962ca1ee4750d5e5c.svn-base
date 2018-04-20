@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.LLotteryTypeDao">
+    
+	<sql id="lLotteryTypeColumns">
+		a.id AS "id",
+		a.rule_id AS "ruleId",
+		a.lottery_type_name AS "lotteryTypeName",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="lLotteryTypeJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="LLotteryType" >
+		SELECT 
+			<include refid="lLotteryTypeColumns"/>
+		FROM l_lottery_type a
+		<include refid="lLotteryTypeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LLotteryType" >
+		SELECT 
+			<include refid="lLotteryTypeColumns"/>
+		FROM l_lottery_type a
+		<include refid="lLotteryTypeJoins"/>
+		<where>
+			
+			<if test="ruleId != null and ruleId != ''">
+				AND a.rule_id = #{ruleId}
+			</if>
+			<if test="lotteryTypeName != null and lotteryTypeName != ''">
+				AND a.lottery_type_name = #{lotteryTypeName}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findSelectList" resultType="LLotteryType" >
+		select a.id AS "id",
+		a.lottery_type_name AS "lotteryTypeName"
+		FROM l_lottery_type a
+		where del_flag=0
+	</select>
+	
+	<select id="findAllList" resultType="LLotteryType" >
+		SELECT 
+			<include refid="lLotteryTypeColumns"/>
+		FROM l_lottery_type a
+		<include refid="lLotteryTypeJoins"/>
+		<where>
+			and del_flag=0
+			<if test="lotteryTypeName != null and lotteryTypeName != ''">
+				AND a.lottery_type_name = #{lotteryTypeName}
+			</if>
+			<if test="ruleId != null and ruleId != ''">
+				AND a.rule_id = #{ruleId}
+			</if>
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO l_lottery_type(
+			rule_id,
+			lottery_type_name,
+			create_date
+		) VALUES (
+			#{ruleId},
+			#{lotteryTypeName},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE l_lottery_type SET 	
+			id = #{id},
+			rule_id = #{ruleId},
+			lottery_type_name = #{lotteryTypeName}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM l_lottery_type
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE l_lottery_type SET 
+			del_flag = 1
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="LLotteryType" statementType="STATEMENT">
+		select * FROM l_lottery_type  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

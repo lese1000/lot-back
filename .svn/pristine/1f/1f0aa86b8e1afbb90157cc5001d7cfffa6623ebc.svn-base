@@ -1,0 +1,196 @@
+/**
+ * apple
+ */
+package com.jeeplus.modules.lottery.web;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
+
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.google.common.collect.Lists;
+import com.jeeplus.common.utils.DateUtils;
+import com.jeeplus.common.utils.MyBeanUtils;
+import com.jeeplus.common.config.Global;
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.common.utils.StringUtils;
+import com.jeeplus.common.utils.excel.ExportExcel;
+import com.jeeplus.common.utils.excel.ImportExcel;
+import com.jeeplus.modules.lottery.entity.SReceivablesInfo;
+import com.jeeplus.modules.lottery.service.SReceivablesInfoService;
+
+/**
+ * ReceivablesInfoController
+ * @author asd
+ * @version 2018-01-29
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/lottery/sReceivablesInfo")
+public class SReceivablesInfoController extends BaseController {
+
+	@Autowired
+	private SReceivablesInfoService sReceivablesInfoService;
+	
+	@ModelAttribute
+	public SReceivablesInfo get(@RequestParam(required=false) String id) {
+		SReceivablesInfo entity = null;
+		if (StringUtils.isNotBlank(id)){
+			entity = sReceivablesInfoService.get(id);
+		}
+		if (entity == null){
+			entity = new SReceivablesInfo();
+		}
+		return entity;
+	}
+	
+	/**
+	 * ReceivablesInfo列表页面
+	 */
+	@RequiresPermissions("lottery:sReceivablesInfo:list")
+	@RequestMapping(value = {"list", ""})
+	public String list(SReceivablesInfo sReceivablesInfo, HttpServletRequest request, HttpServletResponse response, Model model) {
+		Page<SReceivablesInfo> page = sReceivablesInfoService.findPage(new Page<SReceivablesInfo>(request, response), sReceivablesInfo); 
+		model.addAttribute("page", page);
+		return "modules/lottery/sReceivablesInfoList";
+	}
+
+	/**
+	 * 查看，增加，编辑ReceivablesInfo表单页面
+	 */
+	@RequiresPermissions(value={"lottery:sReceivablesInfo:view","lottery:sReceivablesInfo:add","lottery:sReceivablesInfo:edit"},logical=Logical.OR)
+	@RequestMapping(value = "form")
+	public String form(SReceivablesInfo sReceivablesInfo, Model model) {
+		model.addAttribute("sReceivablesInfo", sReceivablesInfo);
+		return "modules/lottery/sReceivablesInfoForm";
+	}
+
+	/**
+	 * 保存ReceivablesInfo
+	 */
+	@RequiresPermissions(value={"lottery:sReceivablesInfo:add","lottery:sReceivablesInfo:edit"},logical=Logical.OR)
+	@RequestMapping(value = "save")
+	public String save(SReceivablesInfo sReceivablesInfo, Model model, RedirectAttributes redirectAttributes) throws Exception{
+		if (!beanValidator(model, sReceivablesInfo)){
+			return form(sReceivablesInfo, model);
+		}
+		if(!sReceivablesInfo.getIsNewRecord()){//编辑表单保存
+			SReceivablesInfo t = sReceivablesInfoService.get(sReceivablesInfo.getId());//从数据库取出记录的值
+			MyBeanUtils.copyBeanNotNull2Bean(sReceivablesInfo, t);//将编辑表单中的非NULL值覆盖数据库记录中的值
+			sReceivablesInfoService.save(t);//保存
+		}else{//新增表单保存
+			sReceivablesInfoService.save(sReceivablesInfo);//保存
+		}
+		addMessage(redirectAttributes, "保存ReceivablesInfo成功");
+		return "redirect:"+Global.getAdminPath()+"/lottery/sReceivablesInfo/?repage";
+	}
+	
+	/**
+	 * 删除ReceivablesInfo
+	 */
+	@RequiresPermissions("lottery:sReceivablesInfo:del")
+	@RequestMapping(value = "delete")
+	public String delete(SReceivablesInfo sReceivablesInfo, RedirectAttributes redirectAttributes) {
+		sReceivablesInfoService.delete(sReceivablesInfo);
+		addMessage(redirectAttributes, "删除ReceivablesInfo成功");
+		return "redirect:"+Global.getAdminPath()+"/lottery/sReceivablesInfo/?repage";
+	}
+	
+	/**
+	 * 批量删除ReceivablesInfo
+	 */
+	@RequiresPermissions("lottery:sReceivablesInfo:del")
+	@RequestMapping(value = "deleteAll")
+	public String deleteAll(String ids, RedirectAttributes redirectAttributes) {
+		String idArray[] =ids.split(",");
+		for(String id : idArray){
+			sReceivablesInfoService.delete(sReceivablesInfoService.get(id));
+		}
+		addMessage(redirectAttributes, "删除ReceivablesInfo成功");
+		return "redirect:"+Global.getAdminPath()+"/lottery/sReceivablesInfo/?repage";
+	}
+	
+	/**
+	 * 导出excel文件
+	 */
+	@RequiresPermissions("lottery:sReceivablesInfo:export")
+    @RequestMapping(value = "export", method=RequestMethod.POST)
+    public String exportFile(SReceivablesInfo sReceivablesInfo, HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes) {
+		try {
+            String fileName = "ReceivablesInfo"+DateUtils.getDate("yyyyMMddHHmmss")+".xlsx";
+            Page<SReceivablesInfo> page = sReceivablesInfoService.findPage(new Page<SReceivablesInfo>(request, response, -1), sReceivablesInfo);
+    		new ExportExcel("ReceivablesInfo", SReceivablesInfo.class).setDataList(page.getList()).write(response, fileName).dispose();
+    		return null;
+		} catch (Exception e) {
+			addMessage(redirectAttributes, "导出ReceivablesInfo记录失败！失败信息："+e.getMessage());
+		}
+		return "redirect:"+Global.getAdminPath()+"/lottery/sReceivablesInfo/?repage";
+    }
+
+	/**
+	 * 导入Excel数据
+
+	 */
+	@RequiresPermissions("lottery:sReceivablesInfo:import")
+    @RequestMapping(value = "import", method=RequestMethod.POST)
+    public String importFile(MultipartFile file, RedirectAttributes redirectAttributes) {
+		try {
+			int successNum = 0;
+			int failureNum = 0;
+			StringBuilder failureMsg = new StringBuilder();
+			ImportExcel ei = new ImportExcel(file, 1, 0);
+			List<SReceivablesInfo> list = ei.getDataList(SReceivablesInfo.class);
+			for (SReceivablesInfo sReceivablesInfo : list){
+				try{
+					sReceivablesInfoService.save(sReceivablesInfo);
+					successNum++;
+				}catch(ConstraintViolationException ex){
+					failureNum++;
+				}catch (Exception ex) {
+					failureNum++;
+				}
+			}
+			if (failureNum>0){
+				failureMsg.insert(0, "，失败 "+failureNum+" 条ReceivablesInfo记录。");
+			}
+			addMessage(redirectAttributes, "已成功导入 "+successNum+" 条ReceivablesInfo记录"+failureMsg);
+		} catch (Exception e) {
+			addMessage(redirectAttributes, "导入ReceivablesInfo失败！失败信息："+e.getMessage());
+		}
+		return "redirect:"+Global.getAdminPath()+"/lottery/sReceivablesInfo/?repage";
+    }
+	
+	/**
+	 * 下载导入ReceivablesInfo数据模板
+	 */
+	@RequiresPermissions("lottery:sReceivablesInfo:import")
+    @RequestMapping(value = "import/template")
+    public String importFileTemplate(HttpServletResponse response, RedirectAttributes redirectAttributes) {
+		try {
+            String fileName = "ReceivablesInfo数据导入模板.xlsx";
+    		List<SReceivablesInfo> list = Lists.newArrayList(); 
+    		new ExportExcel("ReceivablesInfo数据", SReceivablesInfo.class, 1).setDataList(list).write(response, fileName).dispose();
+    		return null;
+		} catch (Exception e) {
+			addMessage(redirectAttributes, "导入模板下载失败！失败信息："+e.getMessage());
+		}
+		return "redirect:"+Global.getAdminPath()+"/lottery/sReceivablesInfo/?repage";
+    }
+	
+	
+	
+
+}

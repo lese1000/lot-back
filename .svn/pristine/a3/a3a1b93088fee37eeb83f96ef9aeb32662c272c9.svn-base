@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.POrderDao">
+    
+	<sql id="pOrderColumns">
+		a.id AS "id",
+		a.order_num AS "orderNum",
+		a.lottery_num_id AS "lotteryNumId",
+		a.player_id AS "playerId",
+		a.is_join_buy AS "isJoinBuy",
+		a.order_status AS "orderStatus",
+		a.total_win_money AS "totalWinMoney",
+		a.total_betting_money AS "totalBettingMoney",
+		a.create_time AS "createTime"
+	</sql>
+	
+	<sql id="pOrderJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="POrder" >
+		SELECT 
+			<include refid="pOrderColumns"/>
+		FROM p_order a
+		<include refid="pOrderJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="POrder" >
+		SELECT 
+			a.id AS "id",
+			a.order_num AS "orderNum",
+			a.lottery_num_id AS "lotteryNumId",
+			a.player_id AS "playerId",
+			a.is_join_buy AS "isJoinBuy",
+			a.order_status AS "orderStatus",
+			a.total_win_money AS "totalWinMoney",
+			a.total_betting_money AS "totalBettingMoney",
+			a.create_time AS "createTime",
+			b.lottery_num AS "lotteryNum",
+			c.lottery_type_name AS "lotteryType",
+			d.player_name AS "playerName"
+			
+		FROM p_order a
+		Left join l_lottery_num b on a.lottery_num_id=b.id
+		Left join l_lottery_type c on b.lottery_type_id=c.id
+		Left join p_player d on a.player_id=d.id
+		<include refid="pOrderJoins"/>
+		<where>
+			<if test="orderNum != null and orderNum != ''">
+				AND a.order_num = #{orderNum}
+			</if>
+			<if test="isJoinBuy != null">
+				AND a.is_join_buy = #{isJoinBuy}
+			</if>
+			<if test="orderStatus != null ">
+				AND a.order_status = #{orderStatus}
+			</if>
+			<if test="playerName != null and playerName != ''">
+				AND d.player_name = #{playerName}
+			</if>
+			<if test="lotteryNum != null and lotteryNum != ''">
+				AND b.lottery_num = #{lotteryNum}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_time BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY  a.id desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="POrder" >
+		SELECT 
+			<include refid="pOrderColumns"/>
+		FROM p_order a
+		<include refid="pOrderJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO p_order(
+			order_num,
+			lottery_num_id,
+			player_id,
+			is_join_buy,
+			order_status,
+			create_time
+		) VALUES (
+			#{orderNum},
+			#{lotteryNumId},
+			#{playerId},
+			#{isJoinBuy},
+			#{orderStatus},
+			#{createTime}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE p_order SET 	
+			id = #{id},
+			order_num = #{orderNum},
+			lottery_num_id = #{lotteryNumId},
+			player_id = #{playerId},
+			is_join_buy = #{isJoinBuy},
+			order_status = #{orderStatus},
+			create_time = #{createTime}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM p_order
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE p_order SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="POrder" statementType="STATEMENT">
+		select * FROM p_order  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findOrderSumMoneyGroupByLotteryNum" resultType="com.jeeplus.modules.lottery.vo.OrderLotteryNumVo" >
+		SELECT a.lottery_num_id,b.lottery_num,c.lottery_type_name,SUM(a.total_betting_money) totalBettingMoney,SUM(a.total_win_money)  totalWinMoney
+		from p_order a,l_lottery_num b,l_lottery_type c
+		where a.lottery_num_id=b.id and b.lottery_type_id=c.id 
+		<if test="createDateStart!=null">
+			and b.open_time &gt;=#{createDateStart}
+		</if>
+		<if test="createDateEnd!=null">
+			and b.open_time &lt;#{createDateEnd}
+		</if>
+		<if test="lotteryNum!=null and lotteryNum!=''">
+			and b.lottery_num = #{lotteryNum}
+		</if>
+		GROUP BY  a.lottery_num_id,b.lottery_num;
+	</select>
+	
+	<select id="findOrderSumMoneyGroupByPlauer" resultType="com.jeeplus.modules.lottery.vo.PlayerOrderVo" >
+		SELECT a.player_id,c.player_name,SUM(a.total_betting_money) totalBettingMoney,SUM(a.total_win_money)  totalWinMoney
+		from p_order a,l_lottery_num b,p_player c
+		where a.lottery_num_id=b.id and a.player_id=c.id 
+		<if test="createDateStart!=null">
+			and b.open_time &gt;=#{createDateStart}
+		</if>
+		<if test="createDateEnd!=null">
+			and b.open_time &lt;#{createDateEnd}
+		</if>
+		<if test="lotteryNum!=null and lotteryNum!=''">
+			and b.lottery_num = #{lotteryNum}
+		</if>
+		GROUP BY  a.player_id,c.player_name
+	</select>
+	
+	<select id="findOrderSumMoneyGroupByDay" resultType="com.jeeplus.modules.lottery.vo.DayOrderVo" >
+		SELECT DATE_FORMAT(a.create_time,'%Y-%m-%d') orderDay,SUM(a.total_betting_money) totalBettingMoney,SUM(a.total_win_money)  totalWinMoney
+		from p_order a
+		where 1=1
+		<if test="createDateStart!=null">
+			and a.open_time &gt;=#{createDateStart}
+		</if>
+		<if test="createDateEnd!=null">
+			and a.open_time &lt;#{createDateEnd}
+		</if>
+		GROUP BY DATE_FORMAT(a.create_time,'%Y-%m-%d') 
+	</select>
+	
+	
+</mapper>

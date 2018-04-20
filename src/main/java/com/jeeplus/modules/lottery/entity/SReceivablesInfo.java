@@ -1,0 +1,138 @@
+/**
+ * apple
+ */
+package com.jeeplus.modules.lottery.entity;
+
+import javax.validation.constraints.NotNull;
+import java.util.Date;
+
+import com.jeeplus.common.persistence.DataEntity;
+import com.jeeplus.common.utils.excel.annotation.ExcelField;
+
+/**
+ * ReceivablesInfoEntity
+ * @author asd
+ * @version 2018-01-29
+ */
+public class SReceivablesInfo extends DataEntity<SReceivablesInfo> {
+	
+	private static final long serialVersionUID = 1L;
+	private String bank;		// bank
+	private String fullName;		// full_name
+	private String openingBank;		// opening_bank
+	private String account;		// account
+	private Integer useImg;		// 是否使用图片：1,是，0，否。使用图片时，不展示银行信息。
+	private String imgUrl;		// img_url
+	private Integer type;		// 收款方式：1，银行转账，2，微信转账
+	private Long createUser;		// create_user
+	private Long updateUser;		// update_user
+	private Date beginCreateDate;		// 开始 create_date
+	private Date endCreateDate;		// 结束 create_date
+	
+	public SReceivablesInfo() {
+		super();
+	}
+
+	public SReceivablesInfo(String id){
+		super(id);
+	}
+
+	
+	@ExcelField(title="bank", align=2, sort=1)
+	public String getBank() {
+		return bank;
+	}
+
+	public void setBank(String bank) {
+		this.bank = bank;
+	}
+	
+	@ExcelField(title="full_name", align=2, sort=2)
+	public String getFullName() {
+		return fullName;
+	}
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+	
+	@ExcelField(title="opening_bank", align=2, sort=3)
+	public String getOpeningBank() {
+		return openingBank;
+	}
+
+	public void setOpeningBank(String openingBank) {
+		this.openingBank = openingBank;
+	}
+	
+	@ExcelField(title="account", align=2, sort=4)
+	public String getAccount() {
+		return account;
+	}
+
+	public void setAccount(String account) {
+		this.account = account;
+	}
+	
+	@ExcelField(title="是否使用图片：1,是，0，否。使用图片时，不展示银行信息。", align=2, sort=5)
+	public Integer getUseImg() {
+		return useImg;
+	}
+
+	public void setUseImg(Integer useImg) {
+		this.useImg = useImg;
+	}
+	
+	@ExcelField(title="img_url", align=2, sort=6)
+	public String getImgUrl() {
+		return imgUrl;
+	}
+
+	public void setImgUrl(String imgUrl) {
+		this.imgUrl = imgUrl;
+	}
+	
+	@ExcelField(title="收款方式：1，银行转账，2，微信转账", align=2, sort=7)
+	public Integer getType() {
+		return type;
+	}
+
+	public void setType(Integer type) {
+		this.type = type;
+	}
+	
+	@ExcelField(title="create_user", align=2, sort=8)
+	public Long getCreateUser() {
+		return createUser;
+	}
+
+	public void setCreateUser(Long createUser) {
+		this.createUser = createUser;
+	}
+	
+	@ExcelField(title="update_user", align=2, sort=9)
+	public Long getUpdateUser() {
+		return updateUser;
+	}
+
+	public void setUpdateUser(Long updateUser) {
+		this.updateUser = updateUser;
+	}
+	
+	public Date getBeginCreateDate() {
+		return beginCreateDate;
+	}
+
+	public void setBeginCreateDate(Date beginCreateDate) {
+		this.beginCreateDate = beginCreateDate;
+	}
+	
+	public Date getEndCreateDate() {
+		return endCreateDate;
+	}
+
+	public void setEndCreateDate(Date endCreateDate) {
+		this.endCreateDate = endCreateDate;
+	}
+		
+}

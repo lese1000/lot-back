@@ -1,0 +1,215 @@
+/**
+ * apple
+ */
+package com.jeeplus.modules.sys.web;
+
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
+
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.google.common.collect.Lists;
+import com.jeeplus.common.config.Global;
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.utils.DateUtils;
+import com.jeeplus.common.utils.MyBeanUtils;
+import com.jeeplus.common.utils.StringUtils;
+import com.jeeplus.common.utils.excel.ExportExcel;
+import com.jeeplus.common.utils.excel.ImportExcel;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.sys.entity.PPlayer;
+import com.jeeplus.modules.sys.service.PPlayerService;
+import com.jeeplus.modules.sys.utils.UserUtils;
+
+/**
+ * 玩家账号Controller
+ * @author asd
+ * @version 2018-01-24
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/sys/pPlayer")
+public class PPlayerController extends BaseController {
+
+	@Autowired
+	private PPlayerService pPlayerService;
+	
+	@ModelAttribute
+	public PPlayer get(@RequestParam(required=false) String id) {
+		PPlayer entity = null;
+		if (StringUtils.isNotBlank(id)){
+			entity = pPlayerService.get(id);
+		}
+		if (entity == null){
+			entity = new PPlayer();
+		}
+		return entity;
+	}
+	
+	/**
+	 * 玩家账号列表页面
+	 */
+	@RequiresPermissions("sys:pPlayer:list")
+	@RequestMapping(value = {"list", ""})
+	public String list(PPlayer pPlayer, HttpServletRequest request, HttpServletResponse response, Model model) {
+		Page<PPlayer> page = pPlayerService.findPage(new Page<PPlayer>(request, response), pPlayer); 
+		model.addAttribute("page", page);
+		model.addAttribute("pPlayer", pPlayer);
+		return "modules/sys/pPlayerList";
+	}
+	
+	/**
+	 * 玩家账号列表页面
+	 */
+	@RequiresPermissions("sys:pPlayer:list")
+	@RequestMapping(value = "/nextPlayerList")
+	public String nextlist(PPlayer pPlayer, HttpServletRequest request, HttpServletResponse response, Model model) {
+		Page<PPlayer> page = pPlayerService.findPage(new Page<PPlayer>(request, response), pPlayer); 
+		model.addAttribute("page", page);
+		model.addAttribute("pPlayer", pPlayer);
+		return "modules/sys/nextPlayerList";
+	}
+
+	/**
+	 * 查看，增加，编辑玩家账号表单页面
+	 */
+	@RequiresPermissions(value={"sys:pPlayer:view","sys:pPlayer:add","sys:pPlayer:edit"},logical=Logical.OR)
+	@RequestMapping(value = "form")
+	public String form(PPlayer pPlayer, Model model) {
+		model.addAttribute("pPlayer", pPlayer);
+		return "modules/sys/pPlayerForm";
+	}
+
+	/**
+	 * 保存玩家账号
+	 */
+	@RequiresPermissions(value={"sys:pPlayer:add","sys:pPlayer:edit"},logical=Logical.OR)
+	@RequestMapping(value = "save")
+	public String save(PPlayer pPlayer, Model model, RedirectAttributes redirectAttributes) throws Exception{
+		if (!beanValidator(model, pPlayer)){
+			return form(pPlayer, model);
+		}
+		if(!pPlayer.getIsNewRecord()){//编辑表单保存
+			PPlayer t = pPlayerService.get(pPlayer.getId());//从数据库取出记录的值
+			MyBeanUtils.copyBeanNotNull2Bean(pPlayer, t);//将编辑表单中的非NULL值覆盖数据库记录中的值
+			t.setUpdateUser(UserUtils.getUser().getLoginName());
+			t.setIsNewRecord(false);
+			pPlayerService.update(t);//保存
+		}else{//新增表单保存
+			pPlayer.setCreateDate(new Date());
+			pPlayer.setCreateUser(UserUtils.getUser().getLoginName());
+			pPlayerService.insert(pPlayer);//保存
+		}
+		addMessage(redirectAttributes, "保存玩家账号成功");
+		return "redirect:"+Global.getAdminPath()+"/sys/pPlayer/?repage";
+	}
+	
+	/**
+	 * 删除玩家账号
+	 */
+	@RequiresPermissions("sys:pPlayer:del")
+	@RequestMapping(value = "delete")
+	public String delete(PPlayer pPlayer, RedirectAttributes redirectAttributes) {
+		pPlayerService.delete(pPlayer);
+		addMessage(redirectAttributes, "删除玩家账号成功");
+		return "redirect:"+Global.getAdminPath()+"/sys/pPlayer/?repage";
+	}
+	
+	/**
+	 * 批量删除玩家账号
+	 */
+	@RequiresPermissions("sys:pPlayer:del")
+	@RequestMapping(value = "deleteAll")
+	public String deleteAll(String ids, RedirectAttributes redirectAttributes) {
+		String idArray[] =ids.split(",");
+		for(String id : idArray){
+			pPlayerService.delete(pPlayerService.get(id));
+		}
+		addMessage(redirectAttributes, "删除玩家账号成功");
+		return "redirect:"+Global.getAdminPath()+"/sys/pPlayer/?repage";
+	}
+	
+	/**
+	 * 导出excel文件
+	 */
+	@RequiresPermissions("sys:pPlayer:export")
+    @RequestMapping(value = "export", method=RequestMethod.POST)
+    public String exportFile(PPlayer pPlayer, HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes) {
+		try {
+            String fileName = "玩家账号"+DateUtils.getDate("yyyyMMddHHmmss")+".xlsx";
+            Page<PPlayer> page = pPlayerService.findPage(new Page<PPlayer>(request, response, -1), pPlayer);
+    		new ExportExcel("玩家账号", PPlayer.class).setDataList(page.getList()).write(response, fileName).dispose();
+    		return null;
+		} catch (Exception e) {
+			addMessage(redirectAttributes, "导出玩家账号记录失败！失败信息："+e.getMessage());
+		}
+		return "redirect:"+Global.getAdminPath()+"/sys/pPlayer/?repage";
+    }
+
+	/**
+	 * 导入Excel数据
+
+	 */
+	@RequiresPermissions("sys:pPlayer:import")
+    @RequestMapping(value = "import", method=RequestMethod.POST)
+    public String importFile(MultipartFile file, RedirectAttributes redirectAttributes) {
+		try {
+			int successNum = 0;
+			int failureNum = 0;
+			StringBuilder failureMsg = new StringBuilder();
+			ImportExcel ei = new ImportExcel(file, 1, 0);
+			List<PPlayer> list = ei.getDataList(PPlayer.class);
+			for (PPlayer pPlayer : list){
+				try{
+					pPlayerService.save(pPlayer);
+					successNum++;
+				}catch(ConstraintViolationException ex){
+					failureNum++;
+				}catch (Exception ex) {
+					failureNum++;
+				}
+			}
+			if (failureNum>0){
+				failureMsg.insert(0, "，失败 "+failureNum+" 条玩家账号记录。");
+			}
+			addMessage(redirectAttributes, "已成功导入 "+successNum+" 条玩家账号记录"+failureMsg);
+		} catch (Exception e) {
+			addMessage(redirectAttributes, "导入玩家账号失败！失败信息："+e.getMessage());
+		}
+		return "redirect:"+Global.getAdminPath()+"/sys/pPlayer/?repage";
+    }
+	
+	/**
+	 * 下载导入玩家账号数据模板
+	 */
+	@RequiresPermissions("sys:pPlayer:import")
+    @RequestMapping(value = "import/template")
+    public String importFileTemplate(HttpServletResponse response, RedirectAttributes redirectAttributes) {
+		try {
+            String fileName = "玩家账号数据导入模板.xlsx";
+    		List<PPlayer> list = Lists.newArrayList(); 
+    		new ExportExcel("玩家账号数据", PPlayer.class, 1).setDataList(list).write(response, fileName).dispose();
+    		return null;
+		} catch (Exception e) {
+			addMessage(redirectAttributes, "导入模板下载失败！失败信息："+e.getMessage());
+		}
+		return "redirect:"+Global.getAdminPath()+"/sys/pPlayer/?repage";
+    }
+	
+	
+	
+
+}

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.PBalanceRecordDao">
+    
+	<sql id="pBalanceRecordColumns">
+		a.id AS "id",
+		a.balance_type AS "balanceType",
+		a.order_id AS "orderId",
+		a.player_id AS "playerId",
+		a.balance_val AS "balanceVal",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="pBalanceRecordJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="PBalanceRecord" >
+		SELECT 
+			<include refid="pBalanceRecordColumns"/>
+		FROM p_balance_record a
+		<include refid="pBalanceRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PBalanceRecord" >
+		SELECT 
+			<include refid="pBalanceRecordColumns"/>
+		FROM p_balance_record a
+		<include refid="pBalanceRecordJoins"/>
+		<where>
+			
+			<if test="balanceType != null and balanceType != ''">
+				AND a.balance_type = #{balanceType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PBalanceRecord" >
+		SELECT 
+			<include refid="pBalanceRecordColumns"/>
+		FROM p_balance_record a
+		<include refid="pBalanceRecordJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO p_balance_record(
+			balance_type,
+			<if test="orderId!=null">
+				order_id,
+			</if>
+			player_id,
+			balance_val,
+			create_date,
+			create_user
+		) VALUES (
+			#{balanceType},
+			<if test="orderId!=null">
+				#{orderId},
+			</if>
+			#{playerId},
+			#{balanceVal},
+			NOW(),
+			#{createUser}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE p_balance_record SET 	
+			id = #{id},
+			balance_type = #{balanceType},
+			order_id = #{orderId},
+			player_id = #{playerId},
+			balance_val = #{balanceVal}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM p_balance_record
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE p_balance_record SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PBalanceRecord" statementType="STATEMENT">
+		select * FROM p_balance_record  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

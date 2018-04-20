@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.LLotteryRuleDao">
+    
+	<sql id="LLotteryRuleColumns">
+		a.id AS "id",
+		a.lottery_type_id AS "lotteryTypeId",
+		a.rule_id AS "ruleId",
+		a.plus_awards AS "plusAwards",
+		a.status AS "status"
+	</sql>
+	
+	<sql id="LLotteryRuleJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="LLotteryRule" >
+		SELECT 
+			<include refid="LLotteryRuleColumns"/>
+		FROM l_lottery_rule a
+		<include refid="LLotteryRuleJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LLotteryRule" >
+		SELECT 
+			a.id,a.lottery_type_id lotteryTypeId,a.rule_id ruleId,a.plus_awards plusAwards,
+			a.`status`,b.lottery_type_name lotteryTypeName,c.rule_name ruleName,c.win_prize winPrize,
+			c.remark,c.play_type playType,c.select_number selectNumber
+		FROM l_lottery_rule a
+		LEFT JOIN l_lottery_type b on a.lottery_type_id=b.id
+		LEFT JOIN l_rule c on a.rule_id=c.id
+		<where>
+			<if test="lotteryTypeId != null ">
+				AND a.lottery_type_id = #{lotteryTypeId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			ORDER BY  a.id desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findRuleList" resultType="LRule" >
+		select a.id AS "id",
+		a.rule_name AS "ruleName"
+		FROM l_rule a
+		WHERE id not in (SELECT rule_id FROM l_lottery_rule WHERE lottery_type_id=#{lotteryTypeId})
+	</select>
+	
+	<select id="findAllList" resultType="LLotteryRule" >
+		SELECT 
+			<include refid="LLotteryRuleColumns"/>
+		FROM l_lottery_rule a
+		<include refid="LLotteryRuleJoins"/>
+		<where>
+			and del_flag=0
+			<if test="lotteryTypeName != null and lotteryTypeName != ''">
+				AND a.lottery_type_name = #{lotteryTypeName}
+			</if>
+			<if test="ruleId != null and ruleId != ''">
+				AND a.rule_id = #{ruleId}
+			</if>
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO l_lottery_rule(
+			lottery_type_id,
+			rule_id,
+			status,
+			plus_awards
+		) VALUES (
+			#{lotteryTypeId},
+			#{ruleId},
+			#{status},
+			#{plusAwards}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE l_lottery_rule SET 	
+			status = #{status},
+			plus_awards = #{plusAwards}
+		WHERE id = #{id} 
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM l_lottery_rule
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE l_lottery_rule SET 
+			del_flag = 1
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="LLotteryRule" statementType="STATEMENT">
+		select * FROM l_lottery_rule  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

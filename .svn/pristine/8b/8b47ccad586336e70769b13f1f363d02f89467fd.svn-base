@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.POrderDetailDao">
+    
+	<sql id="pOrderDetailColumns">
+		a.id AS "id",
+		a.betting_num AS "bettingNum",
+		a.betting_count AS "bettingCount",
+		a.betting_money AS "bettingMoney",
+		a.win_prize AS "winPrize",
+		a.order_id AS "orderId",
+		a.rate AS "rate",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="pOrderDetailJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="POrderDetail" >
+		SELECT 
+			<include refid="pOrderDetailColumns"/>
+		FROM p_order_detail a
+		<include refid="pOrderDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="POrderDetail" >
+		SELECT 
+			<include refid="pOrderDetailColumns"/>
+		FROM p_order_detail a
+		<include refid="pOrderDetailJoins"/>
+		<where>
+			<if test="orderId != null ">
+				AND a.order_id = #{orderId}
+			</if>
+			<if test="bettingNum != null and bettingNum != ''">
+				AND a.betting_num = #{bettingNum}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="POrderDetail" >
+		SELECT 
+			<include refid="pOrderDetailColumns"/>
+		FROM p_order_detail a
+		<include refid="pOrderDetailJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO p_order_detail(
+			betting_num,
+			betting_count,
+			betting_money,
+			win_prize,
+			player_id,
+			create_date
+		) VALUES (
+			#{bettingNum},
+			#{bettingCount},
+			#{bettingMoney},
+			#{winPrize},
+			#{playerId},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE p_order_detail SET 	
+			id = #{id},
+			betting_num = #{bettingNum},
+			betting_count = #{bettingCount},
+			betting_money = #{bettingMoney},
+			win_prize = #{winPrize},
+			player_id = #{playerId}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM p_order_detail
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE p_order_detail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="POrderDetail" statementType="STATEMENT">
+		select * FROM p_order_detail  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

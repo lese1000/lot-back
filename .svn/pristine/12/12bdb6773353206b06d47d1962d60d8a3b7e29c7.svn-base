@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.PJoinBuyDetailDao">
+    
+	<sql id="pJoinBuyDetailColumns">
+		a.id AS "id",
+		a.join_buy_id AS "joinBuyId",
+		a.player_id AS "playerId",
+		b.player_name AS "playerName",
+		a.buy_count AS "buyCount",
+		a.buy_money AS "buyMoney",
+		a.win_prize AS "winPrize",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="pJoinBuyDetailJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="PJoinBuyDetail" >
+		SELECT 
+			<include refid="pJoinBuyDetailColumns"/>
+		FROM p_join_buy_detail a
+		left join p_player b on a.player_id=b.id
+		<include refid="pJoinBuyDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PJoinBuyDetail" >
+		SELECT 
+			<include refid="pJoinBuyDetailColumns"/>
+		FROM p_join_buy_detail a
+		<include refid="pJoinBuyDetailJoins"/>
+		left join p_player b on a.player_id=b.id
+		<where>
+			
+			<if test="playerId != null ">
+				AND a.player_id = #{playerId}
+			</if>
+			<if test="joinBuyId != null ">
+				AND a.join_buy_id = #{joinBuyId}
+			</if>
+			<if test="playerName != null and playerName != ''">
+				AND b.player_name = #{playerName}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY  a.id desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PJoinBuyDetail" >
+		SELECT 
+			<include refid="pJoinBuyDetailColumns"/>
+		FROM p_join_buy_detail a
+		left join p_player b on a.player_id=b.id
+		<include refid="pJoinBuyDetailJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO p_join_buy_detail(
+			join_buy_id,
+			player_id,
+			buy_count,
+			buy_money,
+			win_prize,
+			create_date
+		) VALUES (
+			#{joinBuyId},
+			#{playerId},
+			#{buyCount},
+			#{buyMoney},
+			#{winPrize},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE p_join_buy_detail SET 	
+			id = #{id},
+			join_buy_id = #{joinBuyId},
+			player_id = #{playerId},
+			buy_count = #{buyCount},
+			buy_money = #{buyMoney},
+			win_prize = #{winPrize}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM p_join_buy_detail
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE p_join_buy_detail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PJoinBuyDetail" statementType="STATEMENT">
+		select * FROM p_join_buy_detail  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

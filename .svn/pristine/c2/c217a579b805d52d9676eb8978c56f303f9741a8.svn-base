@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.sys.dao.PPlayerDao">
+    
+	<sql id="pPlayerColumns">
+		a.player_id AS "playerId",
+		a.player_name AS "playerName",
+		a.password AS "password",
+		a.pay_password AS "payPassword",
+		a.player_type AS "playerType",
+		a.create_date AS "createDate",
+		a.create_user AS "createUser",
+		a.update_date AS "updateDate",
+		a.update_user AS "updateUser",
+		a.parent AS "parent"
+	</sql>
+	
+	<sql id="pPlayerJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="PPlayer" >
+		SELECT 
+			<include refid="pPlayerColumns"/>
+		FROM p_player a
+		<include refid="pPlayerJoins"/>
+		WHERE a.player_id = #{playerId}
+	</select>
+	
+	<select id="findList" resultType="PPlayer" >
+		SELECT 
+			<include refid="pPlayerColumns"/>
+		FROM p_player a
+		<include refid="pPlayerJoins"/>
+		<where>
+			
+			<if test="playerName != null and playerName != ''">
+				AND a.player_name = #{playerName}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PPlayer" >
+		SELECT 
+			<include refid="pPlayerColumns"/>
+		FROM p_player a
+		<include refid="pPlayerJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO p_player(
+			player_name,
+			password,
+			pay_password,
+			player_type,
+			create_date,
+			create_user,
+			parent
+		) VALUES (
+			#{playerName},
+			#{password},
+			#{payPassword},
+			#{playerType},
+			#{createDate},
+			#{createUser},
+			#{parent}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE p_player SET 	
+			player_name = #{playerName},
+			<if test="password !=null">
+				password = #{password},
+			</if>
+			<if test="payPassword !=null">
+				pay_password = #{payPassword},
+			</if>
+			<if test="parent !=null">
+				parent = #{parent}
+			</if>
+			<if test="playerType !=null">
+				player_type = #{playerType}
+			</if>
+			update_date = NOW(),
+			update_user = #{updateUser}
+			
+		WHERE player_id = #{playerId}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM p_player
+		WHERE player_id = #{playerId}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE p_player SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE player_id = #{playerId}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PPlayer" statementType="STATEMENT">
+		select * FROM p_player  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

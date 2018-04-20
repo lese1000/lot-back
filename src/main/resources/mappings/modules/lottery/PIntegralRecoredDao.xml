@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.PIntegralRecoredDao">
+    
+	<sql id="pIntegralRecoredColumns">
+		a.id AS "id",
+		a.integral_type AS "integralType",
+		a.player_id AS "playerId",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="pIntegralRecoredJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="PIntegralRecored" >
+		SELECT 
+			<include refid="pIntegralRecoredColumns"/>
+		FROM p_integral_record a
+		<include refid="pIntegralRecoredJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PIntegralRecored" >
+		SELECT 
+			<include refid="pIntegralRecoredColumns"/>
+		FROM p_integral_record a
+		<include refid="pIntegralRecoredJoins"/>
+		<where>
+			
+			<if test="integralType != null and integralType != ''">
+				AND a.integral_type = #{integralType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY  a.id desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PIntegralRecored" >
+		SELECT 
+			<include refid="pIntegralRecoredColumns"/>
+		FROM p_integral_record a
+		<include refid="pIntegralRecoredJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO p_integral_record(
+			integral_type,
+			player_id,
+			create_date
+		) VALUES (
+			#{integralType},
+			#{playerId},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE p_integral_record SET 	
+			id = #{id},
+			integral_type = #{integralType},
+			player_id = #{playerId}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM p_integral_record
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE p_integral_record SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PIntegralRecored" statementType="STATEMENT">
+		select * FROM p_integral_record  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

@@ -1,0 +1,219 @@
+/**
+ * apple
+ */
+package com.jeeplus.modules.lottery.web;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
+
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.google.common.collect.Lists;
+import com.jeeplus.common.config.Global;
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.utils.DateUtils;
+import com.jeeplus.common.utils.StringUtils;
+import com.jeeplus.common.utils.excel.ExportExcel;
+import com.jeeplus.common.utils.excel.ImportExcel;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.lottery.entity.PBalance;
+import com.jeeplus.modules.lottery.entity.PBalanceRecord;
+import com.jeeplus.modules.lottery.service.PBalanceRecordService;
+import com.jeeplus.modules.lottery.service.PBalanceService;
+import com.jeeplus.modules.sys.utils.UserUtils;
+
+/**
+ * 余额记录Controller
+ * @author asd
+ * @version 2018-01-29
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/lottery/pBalanceRecord")
+public class PBalanceRecordController extends BaseController {
+
+	@Autowired
+	private PBalanceRecordService pBalanceRecordService;
+	
+	@Autowired
+	private PBalanceService pBalanceService;
+	
+	@ModelAttribute
+	public PBalanceRecord get(@RequestParam(required=false) String id) {
+		PBalanceRecord entity = null;
+		if (StringUtils.isNotBlank(id)){
+			entity = pBalanceRecordService.get(id);
+		}
+		if (entity == null){
+			entity = new PBalanceRecord();
+		}
+		return entity;
+	}
+	
+	/**
+	 * 余额记录列表页面
+	 */
+	@RequiresPermissions("lottery:pBalanceRecord:list")
+	@RequestMapping(value = {"list", ""})
+	public String list(PBalanceRecord pBalanceRecord, HttpServletRequest request, HttpServletResponse response, Model model) {
+		Page<PBalanceRecord> page = pBalanceRecordService.findPage(new Page<PBalanceRecord>(request, response), pBalanceRecord); 
+		model.addAttribute("page", page);
+		model.addAttribute("pBalanceRecord", pBalanceRecord);
+		return "modules/lottery/pBalanceRecordList";
+	}
+
+	/**
+	 * 查看，增加，编辑余额记录表单页面
+	 */
+	@RequiresPermissions(value={"lottery:pBalanceRecord:view","lottery:pBalanceRecord:add","lottery:pBalanceRecord:edit"},logical=Logical.OR)
+	@RequestMapping(value = "form")
+	public String form(PBalanceRecord pBalanceRecord, Model model) {
+		model.addAttribute("pBalanceRecord", pBalanceRecord);
+		return "modules/lottery/pBalanceRecordForm";
+	}
+
+	/**
+	 * 保存余额记录
+	 */
+	@RequiresPermissions(value={"lottery:pBalanceRecord:add","lottery:pBalanceRecord:edit"},logical=Logical.OR)
+	@RequestMapping(value = "save")
+	public String save(PBalanceRecord pBalanceRecord, Model model, RedirectAttributes redirectAttributes) throws Exception{
+		if (!beanValidator(model, pBalanceRecord)){
+			return form(pBalanceRecord, model);
+		}
+		Integer coefficient=1;
+		if(pBalanceRecord.getBalanceType()==2 || pBalanceRecord.getBalanceType()==3  || pBalanceRecord.getBalanceType()==6){
+			coefficient=-1;
+		}
+		
+		PBalance pBalance =pBalanceService.findByPlayerId(pBalanceRecord.getPlayerId());
+		if(pBalance==null){
+			if(coefficient==-1){
+				addMessage(redirectAttributes, "保存余额失败：余额不足");
+				model.addAttribute("pBalanceRecord", pBalanceRecord);
+				return "redirect:"+Global.getAdminPath()+"/sys/pPlayer/?repage";
+			}
+			pBalance=new PBalance();
+		}
+		pBalance.setPlayerId(pBalanceRecord.getPlayerId());
+		pBalance.setBalanceVal(pBalanceRecord.getBalanceVal()*coefficient);
+		int i=pBalanceService.saveR(pBalance);
+		if(i<=0){
+			addMessage(redirectAttributes, "保存余额失败：余额不足");
+			model.addAttribute("pBalanceRecord", pBalanceRecord);
+		}else{
+			pBalanceRecord.setCreateUser(UserUtils.getUser().getLoginName());
+			pBalanceRecordService.save(pBalanceRecord);//保存
+			addMessage(redirectAttributes, "保存余额记录成功");
+		}
+		return "redirect:"+Global.getAdminPath()+"/sys/pPlayer/?repage";
+	}
+	
+	/**
+	 * 删除余额记录
+	 */
+	@RequiresPermissions("lottery:pBalanceRecord:del")
+	@RequestMapping(value = "delete")
+	public String delete(PBalanceRecord pBalanceRecord, RedirectAttributes redirectAttributes) {
+		pBalanceRecordService.delete(pBalanceRecord);
+		addMessage(redirectAttributes, "删除余额记录成功");
+		return "redirect:"+Global.getAdminPath()+"/lottery/pBalanceRecord/?repage";
+	}
+	
+	/**
+	 * 批量删除余额记录
+	 */
+	@RequiresPermissions("lottery:pBalanceRecord:del")
+	@RequestMapping(value = "deleteAll")
+	public String deleteAll(String ids, RedirectAttributes redirectAttributes) {
+		String idArray[] =ids.split(",");
+		for(String id : idArray){
+			pBalanceRecordService.delete(pBalanceRecordService.get(id));
+		}
+		addMessage(redirectAttributes, "删除余额记录成功");
+		return "redirect:"+Global.getAdminPath()+"/lottery/pBalanceRecord/?repage";
+	}
+	
+	/**
+	 * 导出excel文件
+	 */
+	@RequiresPermissions("lottery:pBalanceRecord:export")
+    @RequestMapping(value = "export", method=RequestMethod.POST)
+    public String exportFile(PBalanceRecord pBalanceRecord, HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes) {
+		try {
+            String fileName = "余额记录"+DateUtils.getDate("yyyyMMddHHmmss")+".xlsx";
+            Page<PBalanceRecord> page = pBalanceRecordService.findPage(new Page<PBalanceRecord>(request, response, -1), pBalanceRecord);
+    		new ExportExcel("余额记录", PBalanceRecord.class).setDataList(page.getList()).write(response, fileName).dispose();
+    		return null;
+		} catch (Exception e) {
+			addMessage(redirectAttributes, "导出余额记录记录失败！失败信息："+e.getMessage());
+		}
+		return "redirect:"+Global.getAdminPath()+"/lottery/pBalanceRecord/?repage";
+    }
+
+	/**
+	 * 导入Excel数据
+
+	 */
+	@RequiresPermissions("lottery:pBalanceRecord:import")
+    @RequestMapping(value = "import", method=RequestMethod.POST)
+    public String importFile(MultipartFile file, RedirectAttributes redirectAttributes) {
+		try {
+			int successNum = 0;
+			int failureNum = 0;
+			StringBuilder failureMsg = new StringBuilder();
+			ImportExcel ei = new ImportExcel(file, 1, 0);
+			List<PBalanceRecord> list = ei.getDataList(PBalanceRecord.class);
+			for (PBalanceRecord pBalanceRecord : list){
+				try{
+					pBalanceRecordService.save(pBalanceRecord);
+					successNum++;
+				}catch(ConstraintViolationException ex){
+					failureNum++;
+				}catch (Exception ex) {
+					failureNum++;
+				}
+			}
+			if (failureNum>0){
+				failureMsg.insert(0, "，失败 "+failureNum+" 条余额记录记录。");
+			}
+			addMessage(redirectAttributes, "已成功导入 "+successNum+" 条余额记录记录"+failureMsg);
+		} catch (Exception e) {
+			addMessage(redirectAttributes, "导入余额记录失败！失败信息："+e.getMessage());
+		}
+		return "redirect:"+Global.getAdminPath()+"/lottery/pBalanceRecord/?repage";
+    }
+	
+	/**
+	 * 下载导入余额记录数据模板
+	 */
+	@RequiresPermissions("lottery:pBalanceRecord:import")
+    @RequestMapping(value = "import/template")
+    public String importFileTemplate(HttpServletResponse response, RedirectAttributes redirectAttributes) {
+		try {
+            String fileName = "余额记录数据导入模板.xlsx";
+    		List<PBalanceRecord> list = Lists.newArrayList(); 
+    		new ExportExcel("余额记录数据", PBalanceRecord.class, 1).setDataList(list).write(response, fileName).dispose();
+    		return null;
+		} catch (Exception e) {
+			addMessage(redirectAttributes, "导入模板下载失败！失败信息："+e.getMessage());
+		}
+		return "redirect:"+Global.getAdminPath()+"/lottery/pBalanceRecord/?repage";
+    }
+	
+	
+	
+
+}

@@ -1,0 +1,50 @@
+/**
+ * apple
+ */
+package com.jeeplus.modules.lottery.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.lottery.entity.SRechargeRecord;
+import com.jeeplus.modules.lottery.dao.SRechargeRecordDao;
+
+/**
+ * RechargeRecordService
+ * @author asd
+ * @version 2018-01-29
+ */
+@Service
+@Transactional(readOnly = true)
+public class SRechargeRecordService extends CrudService<SRechargeRecordDao, SRechargeRecord> {
+
+	public SRechargeRecord get(String id) {
+		return super.get(id);
+	}
+	
+	public List<SRechargeRecord> findList(SRechargeRecord sRechargeRecord) {
+		return super.findList(sRechargeRecord);
+	}
+	
+	public Page<SRechargeRecord> findPage(Page<SRechargeRecord> page, SRechargeRecord sRechargeRecord) {
+		return super.findPage(page, sRechargeRecord);
+	}
+	
+	@Transactional(readOnly = false)
+	public void save(SRechargeRecord sRechargeRecord) {
+		super.save(sRechargeRecord);
+	}
+	
+	@Transactional(readOnly = false)
+	public void delete(SRechargeRecord sRechargeRecord) {
+		super.delete(sRechargeRecord);
+	}
+	
+	
+	
+	
+}

@@ -1,0 +1,109 @@
+/**
+ * apple
+ */
+package com.jeeplus.modules.lottery.entity;
+
+import javax.validation.constraints.NotNull;
+
+import com.jeeplus.common.persistence.DataEntity;
+import com.jeeplus.common.utils.excel.annotation.ExcelField;
+
+/**
+ * RechargeRecordEntity
+ * @author asd
+ * @version 2018-01-29
+ */
+public class SRechargeRecord extends DataEntity<SRechargeRecord> {
+	
+	private static final long serialVersionUID = 1L;
+	private Long rechargeId;		// recharge_id
+	private Long playerId;		// player_id
+	private String fullName;		// full_name
+	private String payAccount;		// pay_account
+	private String payTypeId;		// pay_type_id
+	private Double rechargeVal;		// recharge_val
+	private Integer status;		// 状态
+	private Long updateUser;		// update_user
+	
+	public SRechargeRecord() {
+		super();
+	}
+
+	public SRechargeRecord(String id){
+		super(id);
+	}
+
+	@NotNull(message="recharge_id不能为空")
+	@ExcelField(title="recharge_id", align=2, sort=0)
+	public Long getRechargeId() {
+		return rechargeId;
+	}
+
+	public void setRechargeId(Long rechargeId) {
+		this.rechargeId = rechargeId;
+	}
+	
+	@ExcelField(title="player_id", align=2, sort=1)
+	public Long getPlayerId() {
+		return playerId;
+	}
+
+	public void setPlayerId(Long playerId) {
+		this.playerId = playerId;
+	}
+	
+	@ExcelField(title="full_name", align=2, sort=2)
+	public String getFullName() {
+		return fullName;
+	}
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+	
+	@ExcelField(title="pay_account", align=2, sort=3)
+	public String getPayAccount() {
+		return payAccount;
+	}
+
+	public void setPayAccount(String payAccount) {
+		this.payAccount = payAccount;
+	}
+	
+	@ExcelField(title="pay_type_id", align=2, sort=4)
+	public String getPayTypeId() {
+		return payTypeId;
+	}
+
+	public void setPayTypeId(String payTypeId) {
+		this.payTypeId = payTypeId;
+	}
+	
+	@ExcelField(title="recharge_val", align=2, sort=5)
+	public Double getRechargeVal() {
+		return rechargeVal;
+	}
+
+	public void setRechargeVal(Double rechargeVal) {
+		this.rechargeVal = rechargeVal;
+	}
+	
+	@ExcelField(title="状态", dictType="", align=2, sort=8)
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+	
+	@ExcelField(title="update_user", align=2, sort=9)
+	public Long getUpdateUser() {
+		return updateUser;
+	}
+
+	public void setUpdateUser(Long updateUser) {
+		this.updateUser = updateUser;
+	}
+	
+}

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.SReceivablesInfoDao">
+    
+	<sql id="sReceivablesInfoColumns">
+		a.id AS "id",
+		a.bank AS "bank",
+		a.full_name AS "fullName",
+		a.opening_bank AS "openingBank",
+		a.account AS "account",
+		a.use_img AS "useImg",
+		a.img_url AS "imgUrl",
+		a.type AS "type",
+		a.create_user AS "createUser",
+		a.update_user AS "updateUser",
+		a.update_date AS "updateDate",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="sReceivablesInfoJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="SReceivablesInfo" >
+		SELECT 
+			<include refid="sReceivablesInfoColumns"/>
+		FROM s_receivables_info a
+		<include refid="sReceivablesInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SReceivablesInfo" >
+		SELECT 
+			<include refid="sReceivablesInfoColumns"/>
+		FROM s_receivables_info a
+		<include refid="sReceivablesInfoJoins"/>
+		<where>
+			
+			<if test="bank != null and bank != ''">
+				AND a.bank = #{bank}
+			</if>
+			<if test="fullName != null and fullName != ''">
+				AND a.full_name = #{fullName}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SReceivablesInfo" >
+		SELECT 
+			<include refid="sReceivablesInfoColumns"/>
+		FROM s_receivables_info a
+		<include refid="sReceivablesInfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY  a.id desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO s_receivables_info(
+			bank,
+			full_name,
+			opening_bank,
+			account,
+			use_img,
+			img_url,
+			type,
+			create_user,
+			update_user,
+			update_date,
+			create_date
+		) VALUES (
+			#{bank},
+			#{fullName},
+			#{openingBank},
+			#{account},
+			#{useImg},
+			#{imgUrl},
+			#{type},
+			#{createUser},
+			#{updateUser},
+			#{updateDate},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE s_receivables_info SET 	
+			id = #{id},
+			bank = #{bank},
+			full_name = #{fullName},
+			opening_bank = #{openingBank},
+			account = #{account},
+			use_img = #{useImg},
+			img_url = #{imgUrl},
+			type = #{type},
+			create_user = #{createUser},
+			update_user = #{updateUser},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM s_receivables_info
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE s_receivables_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="SReceivablesInfo" statementType="STATEMENT">
+		select * FROM s_receivables_info  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

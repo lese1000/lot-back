@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.PLoginRecordDao">
+    
+	<sql id="pLoginRecordColumns">
+		a.id AS "id",
+		a.player_id AS "playerId",
+		a.ip_addr AS "ipAddr",
+		a.create_date AS "createDate",
+		b.player_name AS "playerName"
+	</sql>
+	
+	<sql id="pLoginRecordJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="PLoginRecord" >
+		SELECT 
+			<include refid="pLoginRecordColumns"/>
+		FROM p_login_record a
+		Left join p_player b on a.player_id=b.id
+		<include refid="pLoginRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PLoginRecord" >
+		SELECT 
+			<include refid="pLoginRecordColumns"/>
+		FROM p_login_record a
+		Left join p_player b on a.player_id=b.id
+		<include refid="pLoginRecordJoins"/>
+		<where>
+			<if test="playerName != null and playerName != ''">
+				AND b.player_name = #{playerName}
+			</if>
+			<if test="playerId != null and playerId != ''">
+				AND a.player_id = #{playerId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY  a.id desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PLoginRecord" >
+		SELECT 
+			<include refid="pLoginRecordColumns"/>
+		FROM p_login_record a
+		Left join p_player b on a.player_id=b.id
+		<include refid="pLoginRecordJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO p_login_record(
+			player_id,
+			ip_addr,
+			create_date
+		) VALUES (
+			#{playerId},
+			#{ipAddr},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE p_login_record SET 	
+			id = #{id},
+			player_id = #{playerId},
+			ip_addr = #{ipAddr}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM p_login_record
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE p_login_record SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PLoginRecord" statementType="STATEMENT">
+		select * FROM p_login_record  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

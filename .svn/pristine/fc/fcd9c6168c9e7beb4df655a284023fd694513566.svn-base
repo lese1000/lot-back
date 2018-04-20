@@ -1,0 +1,50 @@
+/**
+ * apple
+ */
+package com.jeeplus.modules.lottery.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.lottery.entity.PBalanceRecord;
+import com.jeeplus.modules.lottery.dao.PBalanceRecordDao;
+
+/**
+ * 余额记录Service
+ * @author asd
+ * @version 2018-01-29
+ */
+@Service
+@Transactional(readOnly = true)
+public class PBalanceRecordService extends CrudService<PBalanceRecordDao, PBalanceRecord> {
+
+	public PBalanceRecord get(String id) {
+		return super.get(id);
+	}
+	
+	public List<PBalanceRecord> findList(PBalanceRecord pBalanceRecord) {
+		return super.findList(pBalanceRecord);
+	}
+	
+	public Page<PBalanceRecord> findPage(Page<PBalanceRecord> page, PBalanceRecord pBalanceRecord) {
+		return super.findPage(page, pBalanceRecord);
+	}
+	
+	@Transactional(readOnly = false)
+	public void save(PBalanceRecord pBalanceRecord) {
+		super.save(pBalanceRecord);
+	}
+	
+	@Transactional(readOnly = false)
+	public void delete(PBalanceRecord pBalanceRecord) {
+		super.delete(pBalanceRecord);
+	}
+	
+	
+	
+	
+}

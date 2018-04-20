@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.lottery.dao.PJoinBuyDao">
+    
+	<sql id="pJoinBuyColumns">
+		a.id AS "id",
+		a.order_id AS "orderId",
+		a.single_piece_money AS "singlePieceMoney",
+		a.total_piece_num AS "totalPieceNum",
+		a.remaining_piece_num AS "remainingPieceNum",
+		a.plan_type AS "planType",
+		a.least_num AS "leastNum",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="pJoinBuyJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="PJoinBuy" >
+		SELECT 
+			<include refid="pJoinBuyColumns"/>
+		FROM p_join_buy a
+		<include refid="pJoinBuyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PJoinBuy" >
+		SELECT 
+			<include refid="pJoinBuyColumns"/>
+		FROM p_join_buy a
+		<include refid="pJoinBuyJoins"/>
+		<where>
+			
+			<if test="orderId != null and orderId != ''">
+				AND a.order_id = #{orderId}
+			</if>
+			<if test="planType != null and planType != ''">
+				AND a.plan_type = #{planType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PJoinBuy" >
+		SELECT 
+			<include refid="pJoinBuyColumns"/>
+		FROM p_join_buy a
+		<include refid="pJoinBuyJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO p_join_buy(
+			order_id,
+			single_piece_money,
+			total_piece_num,
+			remaining_piece_num,
+			plan_type,
+			least_num,
+			create_date
+		) VALUES (
+			#{orderId},
+			#{singlePieceMoney},
+			#{totalPieceNum},
+			#{remainingPieceNum},
+			#{planType},
+			#{leastNum},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE p_join_buy SET 	
+			id = #{id},
+			order_id = #{orderId},
+			single_piece_money = #{singlePieceMoney},
+			total_piece_num = #{totalPieceNum},
+			remaining_piece_num = #{remainingPieceNum},
+			plan_type = #{planType},
+			least_num = #{leastNum}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM p_join_buy
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE p_join_buy SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PJoinBuy" statementType="STATEMENT">
+		select * FROM p_join_buy  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>
