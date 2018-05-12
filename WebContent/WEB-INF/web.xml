@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
-  <display-name>JeePlus</display-name>
+<web-app 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns="http://java.sun.com/xml/ns/javaee" 
+	xmlns:web="http://java.sun.com/xml/ns/javaee" 
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+  <display-name>lot-back</display-name>
   <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>classpath:spring-context*.xml</param-value>
@@ -77,53 +80,46 @@
       <param-value>com.jeeplus.modules.act.rest.ActRestApplication</param-value>
     </init-param>
   </servlet>
-    <servlet>
-        <servlet-name>org.apache.jsp.webpage.modules.gen.genCodeForm_jsp</servlet-name>
-        <servlet-class>org.apache.jsp.webpage.modules.gen.genCodeForm_jsp</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>org.apache.jsp.webpage.modules.gen.genCodeForm_jsp</servlet-name>
-        <url-pattern>/webpage/modules/gen/genCodeForm.jsp</url-pattern>
-    </servlet-mapping>
-     <servlet>
-        <servlet-name>org.apache.jsp.webpage.modules.gen.genTableForm_jsp</servlet-name>
-        <servlet-class>org.apache.jsp.webpage.modules.gen.genTableForm_jsp</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>org.apache.jsp.webpage.modules.gen.genTableForm_jsp</servlet-name>
-        <url-pattern>/webpage/modules/gen/genTableForm.jsp</url-pattern>
-    </servlet-mapping>
-     <servlet>
-        <servlet-name>org.apache.jsp.webpage.modules.gen.genTableList_jsp</servlet-name>
-        <servlet-class>org.apache.jsp.webpage.modules.gen.genTableList_jsp</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>org.apache.jsp.webpage.modules.gen.genTableList_jsp</servlet-name>
-        <url-pattern>/webpage/modules/gen/genTableList.jsp</url-pattern>
-    </servlet-mapping>
-     <servlet>
-        <servlet-name>org.apache.jsp.webpage.modules.gen.importTableFromDB_jsp</servlet-name>
-        <servlet-class>org.apache.jsp.webpage.modules.gen.importTableFromDB_jsp</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>org.apache.jsp.webpage.modules.gen.importTableFromDB_jsp</servlet-name>
-        <url-pattern>/webpage/modules/gen/importTableFromDB.jsp</url-pattern>
-    </servlet-mapping>
-    
-    
-    <servlet>
-        <servlet-name>org.apache.jsp.webpage.modules.gen.genMenuForm_jsp</servlet-name>
-        <servlet-class>org.apache.jsp.webpage.modules.gen.genMenuForm_jsp</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>org.apache.jsp.webpage.modules.gen.genMenuForm_jsp</servlet-name>
-        <url-pattern>/webpage/modules/gen/genMenuForm.jsp</url-pattern>
-    </servlet-mapping>
+  <servlet>
+    <servlet-name>org.apache.jsp.webpage.modules.gen.genCodeForm_jsp</servlet-name>
+    <servlet-class>org.apache.jsp.webpage.modules.gen.genCodeForm_jsp</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>org.apache.jsp.webpage.modules.gen.genCodeForm_jsp</servlet-name>
+    <url-pattern>/webpage/modules/gen/genCodeForm.jsp</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>org.apache.jsp.webpage.modules.gen.genTableForm_jsp</servlet-name>
+    <servlet-class>org.apache.jsp.webpage.modules.gen.genTableForm_jsp</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>org.apache.jsp.webpage.modules.gen.genTableForm_jsp</servlet-name>
+    <url-pattern>/webpage/modules/gen/genTableForm.jsp</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>org.apache.jsp.webpage.modules.gen.genTableList_jsp</servlet-name>
+    <servlet-class>org.apache.jsp.webpage.modules.gen.genTableList_jsp</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>org.apache.jsp.webpage.modules.gen.genTableList_jsp</servlet-name>
+    <url-pattern>/webpage/modules/gen/genTableList.jsp</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>org.apache.jsp.webpage.modules.gen.importTableFromDB_jsp</servlet-name>
+    <servlet-class>org.apache.jsp.webpage.modules.gen.importTableFromDB_jsp</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>org.apache.jsp.webpage.modules.gen.importTableFromDB_jsp</servlet-name>
+    <url-pattern>/webpage/modules/gen/importTableFromDB.jsp</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>org.apache.jsp.webpage.modules.gen.genMenuForm_jsp</servlet-name>
+    <servlet-class>org.apache.jsp.webpage.modules.gen.genMenuForm_jsp</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>org.apache.jsp.webpage.modules.gen.genMenuForm_jsp</servlet-name>
+    <url-pattern>/webpage/modules/gen/genMenuForm.jsp</url-pattern>
+  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>RestletServlet</servlet-name>
     <url-pattern>/act/rest/service/*</url-pattern>
@@ -201,5 +197,4 @@
     <error-code>404</error-code>
     <location>/webpage/error/404.jsp</location>
   </error-page>
-
 </web-app>
